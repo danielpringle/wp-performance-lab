@@ -68,6 +68,7 @@ function performance_lab_render() {
  */
 require_once __DIR__ . '/includes/class-db-manager.php';
 require_once __DIR__ . '/includes/tools/cron/class-cron.php';
+require_once __DIR__ . '/includes/tools/transients/class-transients.php';
 
 use DPUK_Performance_Lab\Includes\DPUK_DB_Manager;
 
