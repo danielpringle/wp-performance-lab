@@ -511,27 +511,110 @@ class Browser_Asset_Inspector {
      * @param string $url The asset URL.
      * @return string The detected owner or 'Unknown'.
      */
-    private function detect_owner($url) {
+private function detect_owner( $url ) {
 
-        if (!$url) {
-            return 'Unknown';
-        }
+	if ( empty( $url ) ) {
+		return 'Unknown';
+	}
 
-        /**
-         * Plugins
-         */
-        if (strpos($url, '/plugins/') !== false) {
+	$url = wp_parse_url( $url, PHP_URL_PATH );
 
-            preg_match('#/plugins/([^/]+)/#', $url, $matches);
+	if ( empty( $url ) ) {
+		return 'Unknown';
+	}
 
-            if (!empty($matches[1])) {
-                return $matches[1];
-            }
-        }
+	/**
+	 * Measurement / profiling tools
+	 */
+	if ( strpos( $url, '/10-browser-dev-tools/' ) !== false ) {
+		return '10-browser-dev-tools (Profiler)';
+	}
 
-        // Add more owner detection logic as needed
-        return 'Unknown';
-    }
+	if ( strpos( $url, '/debug-bar/' ) !== false ) {
+		return 'Debug Bar (Profiler)';
+	}
+
+
+	/**
+	 * WordPress Core
+	 */
+	if (
+		strpos( $url, '/wp-includes/' ) !== false ||
+		strpos( $url, '/wp-admin/' ) !== false
+	) {
+		return 'WordPress Core';
+	}
+
+
+	/**
+	 * Plugins
+	 */
+	if ( strpos( $url, '/wp-content/plugins/' ) !== false ) {
+
+		preg_match(
+			'#/wp-content/plugins/([^/]+)/#',
+			$url,
+			$matches
+		);
+
+		if ( ! empty( $matches[1] ) ) {
+
+			return ucwords(
+				str_replace(
+					array( '-', '_' ),
+					' ',
+					$matches[1]
+				)
+			);
+		}
+	}
+
+
+	/**
+	 * Themes
+	 */
+	if ( strpos( $url, '/wp-content/themes/' ) !== false ) {
+
+		preg_match(
+			'#/wp-content/themes/([^/]+)/#',
+			$url,
+			$matches
+		);
+
+		if ( ! empty( $matches[1] ) ) {
+
+			return ucwords(
+				str_replace(
+					array( '-', '_' ),
+					' ',
+					$matches[1]
+				)
+			) . ' Theme';
+		}
+	}
+
+
+	/**
+	 * Media uploads
+	 */
+	if ( strpos( $url, '/wp-content/uploads/' ) !== false ) {
+		return 'Media Library';
+	}
+
+
+	/**
+	 * External resources
+	 */
+	$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
+	$url_host  = wp_parse_url( $url, PHP_URL_HOST );
+
+	if ( $url_host && $url_host !== $site_host ) {
+		return 'External Resource';
+	}
+
+
+	return 'Unknown';
+}
 
     /**
      * Generate warnings for a given asset entry based on size and duration.

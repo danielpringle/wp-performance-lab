@@ -71,5 +71,6 @@ class DPUK_DB_Manager {
 
     public static function deactivate() {
         // Nothing to do on deactivation.
+        wp_clear_scheduled_hook( 'pl_cleanup_action_schedular_logs' );
     }
 }
